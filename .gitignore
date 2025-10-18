@@ -2,4 +2,4 @@
 .env
 
 # node modules and packages
-/node_modules 
+node_modules

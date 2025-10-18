@@ -1,13 +1,16 @@
 import './App.css'
+import { Routes, Route } from 'react-router-dom';
+import Home from "./pages/Home"
+import Login from './admin/Login';
 
 function App() {
 
   return (
-    <>
-      <div className='text-9xl flex justify-center items-center h-screen font-bold text-blue-900'>
-        QuickBlog
-      </div>
-    </>
+    <Routes>
+      <Route path="/" element={<Home />}/>
+      <Route path="/admin" element={<Login />}/>
+
+    </Routes>
   )
 }
 

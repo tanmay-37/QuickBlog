@@ -1,1 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @import "tailwindcss";
+
+
+/* colors for the website */
+@theme {
+    --color-brand-purple: #5044E5;
+    --color-silver-gray: #364153;
+
+    --font-sans: 'Open Sans', sans-serif;
+}
