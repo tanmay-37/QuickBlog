@@ -1,24 +1,30 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./db.js";
-import blogRoutes from "./routes/blogRoutes.js"
+import dotenv from 'dotenv';
+import connectDB from './src/db/index.js';
+import { app } from './src/app.js';
+import postRouter from './routes/post.routes.js'
 
-// env variables configuration
-dotenv.config();
-// express app 
-const app = express();
+dotenv.config({
+  path: './.env',
+});
 
-app.use(cors());
-app.use(express.json());
+// Connect to the database and then start the server
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`⚙️ Server is running at port : ${process.env.PORT || 8000}`);
+    });
+  })
+  .catch((err) => {
+    console.log('MONGO db connection failed !!! ', err);
+  });
 
-// routes
-app.use("/api/blogs", blogRoutes)
+/* * ==================
+* ROUTES DECLARATION
+* ==================
+*/
 
-// DB connection
-connectDB();
+// All requests to /api/v1/users will be handled by userRouter
+app.use('/api/v1/users', userRouter);
 
-
-// starting server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server is running on port ${PORT}`));
+// All requests to /api/v1/posts will be handled by postRouter
+app.use('/api/v1/posts', postRouter);
