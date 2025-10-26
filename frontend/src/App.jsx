@@ -1,12 +1,12 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom';
-import Home from "./pages/Home"
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './components/Home/HomePage';
+import BlogForm from './components/blog form/BlogForm';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />}/>
+      <Route path="/" element={<BlogForm />}/>
       {/* protected admin routes */}
     </Routes>
   )

@@ -1,23 +1,46 @@
 import Blog from "../models/BlogSchema.js"
 
 // create blog logic
+// create blog logic
 export const createBlog = async (req, res) => {
-    try {
-        const { title, subtitle, content, author, date, coverImage } = req.body;
+  try {
+    // 1. Get text data from req.body (thanks to multer)
+    const { title, subtitle, content, author, tags } = req.body;
 
-        if(!coverImage) {
-            return res.status(400).json({message: "Cover image URL required"});
-        }
+    // 2. Get the authorId from the token middleware
+    const authorId = req.user.sub;
 
-        const newBlog = new Blog({ title, subtitle, content, author, date, coverImage, 
-            authorId: req.user.sub,
-         });
-
-        const savedBlog = await newBlog.save();
-        res.status(201).json(savedBlog);
-    } catch (error) {   
-        res.status(500).json({ message: "Error creating blog", error });
+    // 3. Get file info from req.file (if it exists)
+    let coverImageUrl = null;
+    if (req.file) {
+      // req.file.filename is the unique name we created in multer
+      // We build the full URL to save in the database
+      coverImageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    } else {
+      // You can decide if a cover image is required or not
+      // return res.status(400).json({message: "Cover image is required"});
     }
+
+    // 4. Create the new blog object for the database
+    const newBlog = new Blog({ 
+      title, 
+      subtitle, 
+      content, 
+      author, 
+      authorId: authorId,
+      coverImage: coverImageUrl, // Save the URL, not the file
+      tags: tags // Multer automatically parses the 'tags[]' array for you
+      // 'date' will be set by default from your schema
+    });
+
+    // 5. Save to MongoDB
+    const savedBlog = await newBlog.save();
+    res.status(201).json(savedBlog);
+
+  } catch (error) {   
+    console.error("Error in createBlog:", error); // Log the full error
+    res.status(500).json({ message: "Error creating blog", error: error.message });
+  }
 };
 
 // get all blogs
