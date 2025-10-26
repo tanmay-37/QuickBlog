@@ -1,30 +1,31 @@
-import dotenv from 'dotenv';
-import connectDB from './src/db/index.js';
-import { app } from './src/app.js';
-import postRouter from './routes/post.routes.js'
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import connectDB from "./db.js";
+import blogRoutes from "./routes/blogRoutes.js";
 
-dotenv.config({
-  path: './.env',
-});
+// --- New Imports ---
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Connect to the database and then start the server
-connectDB()
-  .then(() => {
-    app.listen(process.env.PORT || 8000, () => {
-      console.log(`⚙️ Server is running at port : ${process.env.PORT || 8000}`);
-    });
-  })
-  .catch((err) => {
-    console.log('MONGO db connection failed !!! ', err);
-  });
+// --- ES Module __dirname Workaround ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-/* * ==================
-* ROUTES DECLARATION
-* ==================
-*/
+dotenv.config();
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// All requests to /api/v1/users will be handled by userRouter
-app.use('/api/v1/users', userRouter);
+// --- New Line ---
+// This makes the 'uploads' folder publicly accessible
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// All requests to /api/v1/posts will be handled by postRouter
-app.use('/api/v1/posts', postRouter);
+// --- Your Routes ---
+app.use("/api/blogs", blogRoutes);
+
+connectDB();
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => console.log(`🚀 Server is running on port ${PORT}`));

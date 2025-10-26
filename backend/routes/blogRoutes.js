@@ -5,8 +5,11 @@ import {
     getBlogById,
     updateBlog,
     deleteBlog 
-} from "../controllers/blogController.js"
+} from "../controllers/blogController.js";
 import { verifyCognitoToken } from "../middlewares/verifyCognitoToken.js";
+
+// --- New Import ---
+import upload from "../middlewares/upload.js"; // Adjust path if needed
 
 const router = express.Router();
 
@@ -15,7 +18,11 @@ router.get("/", getAllBlogs);
 router.get("/:id", getBlogById);
 
 // protected routes
-router.post("/", verifyCognitoToken, createBlog);
+// --- Updated Line ---
+// 'upload.single("coverPhoto")' now runs *after* token verification
+// and *before* the createBlog controller function.
+router.post("/", verifyCognitoToken, upload.single("coverPhoto"), createBlog);
+
 router.put("/:id", verifyCognitoToken, updateBlog);
 router.delete("/:id", verifyCognitoToken, deleteBlog);
 

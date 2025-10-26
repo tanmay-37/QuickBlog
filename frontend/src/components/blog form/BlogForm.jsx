@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // 1. Import useEffect
 import { useForm } from 'react-hook-form';
 import RTE from './RTE';
 import GlassButton from '../GlassButton';
 import BlogPreview from './BlogPreview'; // For the modal
+import blogService from '../../services/blogService'; // Your API service
 
-// Assume you have a service file to handle API calls
-// import blogService from '../services/blogService';
+// 2. Import your auth function
+import { getCurrentUserSession } from '../../cognitoAuth'; 
 
 /**
  * The main form for creating a new blog post.
- * @param {object} props
- * @param {string} props.authorName - The name of the logged-in user.
- * @param {string} props.authorId - The Cognito sub (UUID) of the logged-in user.
+ * (No longer needs authorName/authorId props)
  */
-const BlogForm = ({ authorName, authorId }) => {
+const BlogForm = () => { // 3. Removed props
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
@@ -22,70 +21,106 @@ const BlogForm = ({ authorName, authorId }) => {
     register, 
     handleSubmit, 
     control, 
-    getValues, // Used to get data for the preview
+    getValues,
+    setValue, // 4. Get setValue from useForm
+    reset,
     formState: { errors } 
   } = useForm({
     defaultValues: {
       title: '',
-      subtitle: '', // Matches 'subtitle' in your schema
+      subtitle: '',
       content: '',
-      author: authorName || '', // Pre-filled from props
-      authorId: authorId || '', // Pre-filled from props
+      author: '', // 5. Will be populated by useEffect
+      authorId: '', // 5. Will be populated by useEffect
       coverPhoto: null,
       tags: '',
     }
   });
 
+  // 6. This new useEffect hook fetches the user's data on load
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const session = await getCurrentUserSession();
+        const payload = session.getIdToken().payload;
+        
+        // --- This is the key part ---
+        // We get the user's name and ID from the token payload
+        // 'name' is a standard OIDC claim. 'email' is used as a fallback.
+        const usersFullName = payload.name || payload.email || 'Blog Author'; 
+        const userId = payload.sub; // The Cognito sub (UUID)
+
+        // 7. Use setValue to populate the form fields
+        setValue('author', usersFullName);
+        setValue('authorId', userId);
+
+      } catch (error) {
+        console.error("Could not fetch user session:", error.message);
+        // You could show an alert here or redirect to login
+        alert("Could not verify user. Please log in again.");
+      }
+    };
+
+    fetchUser();
+  }, [setValue]); // The dependency array ensures this runs once
+
   /**
    * Handles the final form submission to the backend.
    */
   const onSubmit = async (data) => {
-    if (!data.authorId) {
-      console.error("Critical: Author ID is missing. Cannot create post.");
-      return;
+    
+    // 8. Add a check to ensure user data was populated
+    if (!data.authorId || !data.author) {
+         console.error("Critical: Author info is missing from form. Cannot create post.");
+         alert("Author details are missing. Please refresh and try again.");
+         return;
     }
 
+    let authToken;
+    try {
+      // Get the session again to ensure the token is fresh
+      const session = await getCurrentUserSession(); 
+      authToken = session.getIdToken().getJwtToken(); 
+
+      if (!authToken) {
+        throw new Error("No auth token found in session.");
+      }
+    } catch (authError) {
+      console.error("Authentication Error:", authError.message);
+      alert(authError.message || "Your session has expired. Please log in again.");
+      setIsSubmitting(false);
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Use FormData to send text and files in one request
     const formData = new FormData();
-
-    // Append all text/content fields
     formData.append('title', data.title);
-    formData.append('subtitle', data.append); // Corrected from data.append to data.subtitle
+    formData.append('subtitle', data.subtitle);
     formData.append('content', data.content);
-    formData.append('author', data.author);
-    formData.append('authorId', data.authorId);
+    formData.append('author', data.author);     // This now has a value
+    formData.append('authorId', data.authorId); // This now has a value
 
-    // Process tags from a comma-separated string into an array
     const tagsArray = data.tags.split(',')
       .map(tag => tag.trim())
-      .filter(tag => tag); // Remove empty strings
-
-    // Append each tag individually for the server to parse as an array
+      .filter(tag => tag);
     tagsArray.forEach(tag => {
       formData.append('tags[]', tag);
     });
 
-    // Append the file if it exists
     if (data.coverPhoto && data.coverPhoto[0]) {
       formData.append('coverPhoto', data.coverPhoto[0]);
     }
 
     try {
-      // --- This is where you call your API ---
-      // const response = await blogService.createBlog(formData);
-      // console.log('Blog created successfully:', response);
-      
-      // For demonstration, we'll just log the FormData
-      console.log('Form data ready for submission:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-      // In a real app, you would reset the form or redirect here
-      
+      const response = await blogService.createBlog(formData, authToken);
+      console.log('Blog created successfully:', response.data);
+      alert('Blog post created!'); 
+      reset(); 
     } catch (error) {
-      console.error('Error creating blog:', error);
+      const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
+      console.error('Error creating blog:', errorMessage);
+      alert(`Error: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -122,10 +157,10 @@ const BlogForm = ({ authorName, authorId }) => {
 
   return (
     <>
-      {/* Page Background Wrapper (dark: variants removed) */}
+      {/* Page Background Wrapper */}
       <div className="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-12">
         
-        {/* Translucent Form Card (dark: variants removed) */}
+        {/* Translucent Form Card */}
         <div className="max-w-4xl mx-auto p-6 sm:p-10 bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30">
           
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
@@ -263,7 +298,7 @@ const BlogForm = ({ authorName, authorId }) => {
         </div>
       </div>
 
-      {/* Preview Modal (This is already light-theme only from our previous changes) */}
+      {/* Preview Modal */}
       {isPreviewOpen && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"

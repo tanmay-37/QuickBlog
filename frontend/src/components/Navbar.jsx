@@ -2,35 +2,52 @@
 import { useState, useEffect } from "react";
 import COGNITO_CONFIG from "../cognitoConfig";
 
+// 1. Import all new auth functions
+import { getCurrentUserSession, signOut, handleAuthRedirect } from "../cognitoAuth"; 
+
 const Navbar = () => {
   const [user, setUser] = useState(null);
 
   const {domain, clientId, redirectUri, scopes} = COGNITO_CONFIG;
-
   const scopeStr = scopes.join("+");
 
   const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=token&scope=${scopeStr}&redirect_uri=${redirectUri}`;
   const logoutUrl = `https://${domain}/logout?client_id=${clientId}&logout_uri=${redirectUri}`;
 
-  // Parse tokens from redirect after login
+  // 2. This useEffect hook is now correct
   useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const idToken = params.get("id_token");
-
-    if (idToken) {
-      localStorage.setItem("idToken", idToken);
-      setUser({ token: idToken });
-      window.location.hash = ""; // clean URL
-    } else {
-      const savedToken = localStorage.getItem("idToken");
-      if (savedToken) setUser({ token: savedToken });
-    }
-  }, []);
+    const checkSession = async () => {
+      try {
+        // 1. First, check if this is a redirect from login
+        // This will parse the hash and save tokens to localStorage
+        const userData = await handleAuthRedirect();
+        
+        if (userData) {
+          // We just logged in. Set user from the parsed token.
+          setUser({ email: userData.email });
+          console.log("User successfully logged in. Email:", userData.email);
+        } else {
+          // This is not a redirect. Check for an existing session.
+          const session = await getCurrentUserSession();
+          const userEmail = session.getIdToken().payload.email;
+          setUser({ email: userEmail });
+          console.log("Found existing session for:", userEmail);
+        }
+      } catch (error) {
+        // This is normal if you are logged out
+        console.log("No active user session found.", error.message);
+        setUser(null);
+      }
+    };
+    checkSession();
+  }, []); // Runs once on component mount
 
   const handleLogin = () => window.location.href = loginUrl;
+
+  // 3. This logout function is also correct
   const handleLogout = () => {
-    localStorage.removeItem("idToken");
+    signOut(); // Clears library's tokens
+    setUser(null);
     window.location.href = logoutUrl;
   };
 
@@ -41,15 +58,11 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-3">
-          {/* <a href="/admin">
-            <button className="bg-brand-purple text-white flex items-center justify-center gap-1 text-sm font-medium px-6 py-2 rounded-4xl cursor-pointer hover:transform hover:-translate-y-0.5 shadow-lg">
-              Admin Login
-              <img src="/lock.svg" className="h-5 pb-1" alt="lock" />
-            </button>
-          </a> */}
-
           {user ? (
             <>
+              <span className="text-sm text-gray-800 font-medium">
+                {user.email} 
+              </span>
               <button
                 onClick={handleLogout}
                 className="bg-brand-purple text-white px-4 py-2 rounded-2xl cursor-pointer hover:opacity-90"
