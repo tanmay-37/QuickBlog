@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import translateRouter from "./routes/translateRouter.js"
 
 // --- New Imports ---
 import path from 'path';
@@ -23,6 +24,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Your Routes ---
 app.use("/api/blogs", blogRoutes);
+
+// translate routes
+app.use('/api/translate', translateRouter)
 
 connectDB();
 

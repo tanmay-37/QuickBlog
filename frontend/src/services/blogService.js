@@ -21,9 +21,18 @@ const createBlog = (formData, token) => {
   });
 };
 
+const updateBlog = (id, formData, token) => {
+  return axios.put(`http://localhost:5000/api/blogs/edit/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    }
+  });
+};
+
 // You can add other functions here later (getAllBlogs, etc.)
 const blogService = {
-  createBlog,
+  createBlog, updateBlog
 };
 
 export default blogService;

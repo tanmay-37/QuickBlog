@@ -1,12 +1,40 @@
 import { useState, useEffect } from "react";
+import { CognitoUserPool, CognitoUser } from "amazon-cognito-identity-js";
+import COGNITO_CONFIG from '../cognitoConfig.js';
 
-export function useAuth() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const poolData = {
+  UserPoolId: COGNITO_CONFIG.userPoolId,
+  ClientId: COGNITO_CONFIG.clientId,
+};
 
-    useEffect(() => {
-        const token = localStorage.getItem("idToken");
-        setIsAuthenticated(!!token);
-    }, []);
+const userPool = new CognitoUserPool(poolData);
 
-    return { isAuthenticated };
-}
+export const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // <-- important
+
+  useEffect(() => {
+    const checkSession = () => {
+      const cognitoUser = userPool.getCurrentUser();
+
+      if (!cognitoUser) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
+      cognitoUser.getSession((err, session) => {
+        if (err || !session.isValid()) {
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(true);
+        }
+        setIsLoading(false);
+      });
+    };
+
+    checkSession();
+  }, []);
+
+  return { isAuthenticated, isLoading };
+};

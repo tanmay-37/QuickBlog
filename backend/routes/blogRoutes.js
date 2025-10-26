@@ -23,7 +23,7 @@ router.get("/:id", getBlogById);
 // and *before* the createBlog controller function.
 router.post("/", verifyCognitoToken, upload.single("coverPhoto"), createBlog);
 
-router.put("/:id", verifyCognitoToken, updateBlog);
+router.put("edit/:id", verifyCognitoToken, updateBlog);
 router.delete("/:id", verifyCognitoToken, deleteBlog);
 
 export default router;

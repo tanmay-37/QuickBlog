@@ -66,17 +66,21 @@ export const getBlogById = async (req, res) => {
 
 // update blog by ID
 export const updateBlog = async (req, res) => {
-    try {
-        const updatedBlog = await Blog.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (!updatedBlog) return res.status(404).json({ message: "Blog not found" });
-        res.status(200).json(updatedBlog);
-    } catch (error) {
-        res.status(500).json({ message: "Error updating blog", error });
-    }
+  try {
+    const { id } = req.params;
+    const userId = req.user.sub; // assuming Cognito user ID from verifyToken middleware
+    const blog = await Blog.findById(id);
+
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    if (blog.authorId !== userId)
+      return res.status(403).json({ message: "Not authorized to edit this blog" });
+
+    const updated = await Blog.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error("Error updating blog:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 // Delete a blog by ID

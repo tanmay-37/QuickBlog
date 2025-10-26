@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDebounce } from 'react-use';
 import BlogCard from './BlogCard'; 
+import axios from 'axios';
 
 // --- SVG Icon ---
 const SearchIcon = () => (
@@ -11,6 +12,10 @@ const SearchIcon = () => (
 
 // --- Main HomePage Component ---
 const HomePage = () => {
+
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   // --- STATE ---
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState(''); // Live text in the input
@@ -19,43 +24,25 @@ const HomePage = () => {
   // --- DATA ---
   const categories = ['All', 'Technology', 'Startup', 'Lifestyle', 'Finance'];
   
-  const blogPosts = [
-    { 
-      id: 1, 
-      title: "10 JavaScript Tips for Better Code", 
-      description: "Boost your code efficiency with these simple tricks.", 
-      imageUrl: "https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=870&auto=format&fit=crop",
-      tag: "Technology"
-    },
-    { 
-      id: 2, 
-      title: "A Guide to Mindful Living", 
-      description: "Simple steps to a more present and calm lifestyle.", 
-      imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=870&auto=format&fit=crop",
-      tag: "Lifestyle"
-    },
-    { 
-      id: 3, 
-      title: "AI in Financial Markets", 
-      description: "Analyzing the impact of AI on trading and finance.", 
-      imageUrl: "https://images.unsplash.com/photo-1674005995646-b04f053c7a0c?q=80&w=870&auto-format&fit=crop",
-      tag: "Finance"
-    },
-    { 
-      id: 4, 
-      title: "Startup Culture: Beyond the Tables", 
-      description: "What truly makes a startup environment thrive.", 
-      imageUrl: "https://images.unsplash.com/photo-1556761175-59736f62309e?q=80&w=870&auto=format&fit=crop",
-      tag: "Startup"
-    },
-    {
-      id: 5,
-      title: "Advanced React Patterns",
-      description: "Exploring hooks, context, and other advanced concepts.",
-      imageUrl: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=870&auto=format&fit=crop",
-      tag: "Technology"
+
+
+useEffect(() => {
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/api/blogs');
+      setBlogs(response.data);
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      setBlogs([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  fetchBlogs();
+}, []);
+
 
   // 3. Add the useDebounce hook
   useDebounce(
@@ -67,28 +54,17 @@ const HomePage = () => {
   );
 
   // --- FILTERING LOGIC ---
-  const filteredPosts = blogPosts
-    .filter(post => {
-      // Stage 1: Category Filter (unchanged)
-      if (selectedCategory === 'All') {
-        return true;
-      }
-      return post.tag === selectedCategory;
-    })
-    .filter(post => {
-      // Stage 2: Search Query Filter (uses debounced term)
-      if (debouncedSearchTerm === '') {
-        return true; // If no search, keep all posts
-      }
-      
-      const lowerCaseQuery = debouncedSearchTerm.toLowerCase();
-      // Check title, description, and tag
-      return (
-        post.title.toLowerCase().includes(lowerCaseQuery) ||
-        post.description.toLowerCase().includes(lowerCaseQuery) ||
-        post.tag.toLowerCase().includes(lowerCaseQuery)
-      );
-    });
+  const filteredPosts = loading ? [] : blogs
+  .filter(post => selectedCategory === 'All' || post.tag === selectedCategory)
+  .filter(post => {
+    if (!debouncedSearchTerm) return true;
+    const query = debouncedSearchTerm.toLowerCase();
+    return (
+      post.title.toLowerCase().includes(query) ||
+      post.subtitle.toLowerCase().includes(query) ||
+      post.tags.toLowerCase().includes(query)
+    );
+  });
     
   return (
     <div className="min-h-screen bg-white text-gray-800">
@@ -110,7 +86,7 @@ const HomePage = () => {
           </h1>
           
           <p className="text-gray-600 max-w-lg mx-auto mb-10 text-lg">
-            This is your space to think out loud, to share what matters, and to write without filters. Whether it's one word or a thousand, your story starts right here.
+            This is your space to share what matters, and to write without filters. Whether it's one word or a thousand, your story starts right here. Use AI enabled features to convert your thoughts to amazing blogs
           </p>
           
           {/* Corrected Search Bar */}
@@ -159,10 +135,11 @@ const HomePage = () => {
             {filteredPosts.map(post => (
               <BlogCard 
                 key={post.id}
+                id={post._id}
                 title={post.title}
-                description={post.description}
-                imageUrl={post.imageUrl}
-                tag={post.tag}
+                subtitle={post.subtitle}
+                coverImage={post.coverImage}
+                tags={post.tags}
               />
             ))}
           </div>

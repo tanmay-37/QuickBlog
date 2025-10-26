@@ -60,6 +60,12 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
+              <a 
+              href="/blogs/create"
+              className="bg-gray-100 px-4 py-2 rounded-2xl"
+              >
+              Create
+              </a>
               <span className="text-sm text-gray-800 font-medium">
                 {user.email} 
               </span>
@@ -82,10 +88,6 @@ const Navbar = () => {
 
         {/* Mobile */}
         <div className="md:hidden flex items-center gap-2">
-          <a href="/admin">
-            
-          </a>
-
           {user ? (
             <button className="bg-brand-purple py-2 px-4 rounded-2xl"
             onClick={handleLogout}>
