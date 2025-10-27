@@ -4,7 +4,8 @@ import {
     getAllBlogs, 
     getBlogById,
     updateBlog,
-    deleteBlog 
+    deleteBlog,
+    getMyBlogs // 👈 1. Import the new controller function
 } from "../controllers/blogController.js";
 import { verifyCognitoToken } from "../middlewares/verifyCognitoToken.js";
 
@@ -13,14 +14,20 @@ import upload from "../middlewares/upload.js"; // Adjust path if needed
 
 const router = express.Router();
 
-// public route
-router.get("/", getAllBlogs);
-router.get("/:id", getBlogById);
+// ------------------------------------------------------------------
+// ⭐ 2. ADDED PROTECTED ROUTE FOR USER'S OWN BLOGS ⭐
+// This route must come *before* the public '/:id' route.
+router.get("/myblogs", verifyCognitoToken, getMyBlogs);
+router.put("/edit/:id", verifyCognitoToken, upload.single("coverPhoto"), updateBlog);
+// ------------------------------------------------------------------
 
-// protected routes
-// --- Updated Line ---
-// 'upload.single("coverPhoto")' now runs *after* token verification
-// and *before* the createBlog controller function.
+
+// Public routes
+router.get("/", getAllBlogs);
+router.get("/:id", getBlogById); // This must be last in the GET routes
+
+
+// Protected routes
 router.post("/", verifyCognitoToken, upload.single("coverPhoto"), createBlog);
 
 router.put("edit/:id", verifyCognitoToken, updateBlog);

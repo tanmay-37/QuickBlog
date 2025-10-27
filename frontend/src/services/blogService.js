@@ -9,30 +9,38 @@ const API_URL = 'http://localhost:5000/api/blogs';
  * @param {string} token - The user's Cognito auth token
  */
 const createBlog = (formData, token) => {
-  return axios.post(API_URL, formData, {
-    headers: {
-      // --- REMOVED THIS LINE ---
-      'Content-Type': 'multipart/form-data', 
-      // (Axios will now set this automatically with the correct boundary)
-
-      // This header sends your user's token for verification
-      'Authorization': `Bearer ${token}` 
-    }
-  });
+  return axios.post(API_URL, formData, {
+    headers: {
+      // Axios automatically handles 'Content-Type' for FormData, but keeping for clarity
+      'Authorization': `Bearer ${token}` 
+    }
+  });
 };
 
+/**
+ * Updates an existing blog post.
+ * @param {string} id - The ID of the blog to update
+ * @param {FormData} formData - The form data (text and optional new file)
+ * @param {string} token - The user's Cognito auth token
+ */
 const updateBlog = (id, formData, token) => {
-  return axios.put(`http://localhost:5000/api/blogs/edit/${id}`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'multipart/form-data',
-    }
-  });
+  return axios.put(`http://localhost:5000/api/blogs/edit/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
 };
 
-// You can add other functions here later (getAllBlogs, etc.)
+// ⭐ ADDED: Function to fetch a single blog by ID (Used for editing)
+const getBlogById = (id) => {
+    // Calls the public route: GET /api/blogs/:id
+    return axios.get(`${API_URL}/${id}`);
+};
+
 const blogService = {
-  createBlog, updateBlog
+  createBlog, 
+  updateBlog,
+  getBlogById, // ⭐ EXPORTED THE NEW FUNCTION
 };
 
 export default blogService;

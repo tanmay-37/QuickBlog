@@ -1,6 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -11,7 +12,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@aws-sdk/client-polly": "^3.917.0",
     "@aws-sdk/client-s3": "^3.917.0",
