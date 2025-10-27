@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./db.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import translateRouter from "./routes/translateRouter.js"
+import podcastRouter from "./routes/podcastRouter.js";
 
 // --- New Imports ---
 import path from 'path';
@@ -26,7 +27,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/blogs", blogRoutes);
 
 // translate routes
-app.use('/api/translate', translateRouter)
+app.use('/api/translate', translateRouter);
+
+// podcast routes
+app.use('/api/podcast', podcastRouter);
 
 connectDB();
 

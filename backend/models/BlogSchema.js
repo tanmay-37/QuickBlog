@@ -49,6 +49,10 @@ const BlogSchema = new mongoose.Schema({
         required: true 
     }, // Cognito user sub (UUID)
 
+    podcastUrl: {
+        type:String
+    }
+
 }, { timestamps: true });
 
 export default mongoose.model("Blog", BlogSchema);
