@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // This is the URL of your backend server
-const API_URL = 'http://localhost:5000/api/blogs';
+const API_URL = 'https://quickblog-0df6.onrender.com/api/blogs';
 
 /**
  * Creates a new blog post.
@@ -24,7 +24,7 @@ const createBlog = (formData, token) => {
  * @param {string} token - The user's Cognito auth token
  */
 const updateBlog = (id, formData, token) => {
-  return axios.put(`http://localhost:5000/api/blogs/edit/${id}`, formData, {
+  return axios.put(`https://quickblog-0df6.onrender.com/api/blogs/edit/${id}`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
     }
