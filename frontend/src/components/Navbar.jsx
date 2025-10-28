@@ -15,8 +15,8 @@ const Navbar = () => {
 
   const {domain, clientId, redirectUri, scopes} = COGNITO_CONFIG;
   const scopeStr = scopes.join("+");
-  const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=token&scope=${scopeStr}&redirect_uri=${redirectUri}`;
-  const logoutUrl = `https://${domain}/logout?client_id=${clientId}&logout_uri=${redirectUri}`;
+  const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=token&scope=${scopeStr}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  const logoutUrl = `https://${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(redirectUri)}`;
 
   // Effect to check the user's session on load
   useEffect(() => {
