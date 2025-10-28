@@ -1,20 +1,32 @@
 import multer from 'multer';
+import multerS3 from 'multer-s3';
+import aws from 'aws-sdk';
 import path from 'path';
+import dotenv from 'dotenv';
 
-// Set up storage for uploaded files
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // 'uploads/' is the folder where files will be saved
-    cb(null, 'uploads/'); 
-  },
-  filename: (req, file, cb) => {
-    // Create a unique filename to prevent overwrites
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+dotenv.config();
+
+// AWS config
+aws.config.update({
+  accessKeyId: import.meta.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: import.meta.env.AWS_SECRET_ACCESS_KEY,
+  region: import.meta.env.AWS_REGION,
 });
 
-// Create the multer instance
-const upload = multer({ storage: storage });
+const s3 = new aws.S3();
+
+// Multer S3 storage
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket: process.env.AWS_S3_BUCKET,
+    acl: 'public-read', // ✅ Makes images visible publicly
+    key: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const uniqueName = `${file.fieldname}-${Date.now()}${ext}`;
+      cb(null, uniqueName);
+    },
+  }),
+});
 
 export default upload;

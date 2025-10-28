@@ -14,7 +14,7 @@ export const createBlog = async (req, res) => {
     if (req.file) {
       // req.file.filename is the unique name we created in multer
       // We build the full URL to save in the database
-      coverImageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      coverImageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.location}`;
     } else {
       // You can decide if a cover image is required or not
       // return res.status(400).json({message: "Cover image is required"});
