@@ -73,7 +73,11 @@ const filteredPosts = blogs
   return (
     // ✨ Added gradient background and default text color ✨
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 text-gray-800 font-sans">
-
+        <img 
+            className='absolute w-full h-auto -top-60 z-[10] opacity-40 pointer-events-none' 
+            src="/gra-bg.png" 
+            alt="Gradient Background" 
+        />
       <main>
         {/* 1. Hero Section */}
         <section className="py-20 md:py-32 text-center flex flex-col items-center px-4">

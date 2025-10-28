@@ -8,6 +8,7 @@ import BlogPage from './components/BlogPage';
 import MyBlogs from './components/MyBlogs'; // 👈 IMPORT THE NEW PAGE
 import { useEffect } from 'react';
 import { handleAuthRedirect } from './cognitoAuth';
+import LandingPage from './components/LandingPage';
 
 
 function App() {
@@ -18,7 +19,8 @@ function App() {
     <>
       <Routes>
         {/* public routes */}
-        <Route path="/" element={<HomePage />}/>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<HomePage />}/>
         <Route path="/blogs/:id" element={<BlogPage />}/>
         
         {/* protected routes */}

@@ -1,16 +1,15 @@
 import express from 'express';
-import AWS from 'aws-sdk';
+// ✨ THIS is the correct V3 Import ✨
+import { TranslateClient, TranslateTextCommand } from "@aws-sdk/client-translate";
+// ❌ REMOVE any line that says: import AWS from 'aws-sdk'; ❌
 
 const translateRouter = express.Router();
 
-// Configure AWS Translate
-AWS.config.update({
-  region: 'us-east-1', // choose your region
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// V3 Client Initialization
+const translateClient = new TranslateClient({
+  region: process.env.AWS_REGION || "us-east-1",
+  // Credentials are automatically picked up from environment variables
 });
-
-const translate = new AWS.Translate();
 
 translateRouter.post('/', async (req, res) => {
   try {
@@ -20,16 +19,19 @@ translateRouter.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Text and targetLanguage are required' });
     }
 
-    const params = {
+    // V3 Command Structure
+    const command = new TranslateTextCommand({
       Text: text,
       SourceLanguageCode: targetLanguage === 'hi' ? 'en' : 'hi',
       TargetLanguageCode: targetLanguage,
-    };
+    });
 
-    const result = await translate.translateText(params).promise();
+    // V3 Send Command
+    const result = await translateClient.send(command);
     res.json({ translatedText: result.TranslatedText });
+
   } catch (err) {
-    console.error(err);
+    console.error("AWS Translate Error:", err);
     res.status(500).json({ message: 'Translation failed' });
   }
 });
