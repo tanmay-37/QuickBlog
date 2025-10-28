@@ -8,9 +8,9 @@ dotenv.config();
 
 // AWS config
 aws.config.update({
-  accessKeyId: import.meta.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: import.meta.env.AWS_SECRET_ACCESS_KEY,
-  region: import.meta.env.AWS_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
 });
 
 const s3 = new aws.S3();
@@ -20,7 +20,7 @@ const upload = multer({
   storage: multerS3({
     s3,
     bucket: process.env.AWS_S3_BUCKET,
-    acl: 'public-read', // ✅ Makes images visible publicly
+    acl: 'public-read', 
     key: (req, file, cb) => {
       const ext = path.extname(file.originalname);
       const uniqueName = `${file.fieldname}-${Date.now()}${ext}`;
