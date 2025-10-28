@@ -23,7 +23,12 @@ const app = express();
 
 // --- Middleware ---
 // Configure CORS - Allow requests from your frontend (adjust port if needed)
-app.use(cors({ origin: 'http://localhost:5173' })); // Example: Allowing Vite default port
+app.use(cors({
+  origin: "*",
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true
+}));
+ // Example: Allowing Vite default port
 app.use(express.json({limit: '50mb', extended: true})); // To parse JSON request bodies
 // Serve static files from 'uploads' folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
