@@ -80,7 +80,7 @@ const BlogPage = () => {
             setInitialLoading(true); // Start initial loading
             try {
                 // Fetch Blog
-                const blogRes = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+                const blogRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/blogs/${id}`);
                 setBlog(blogRes.data); // <-- Blog is set here
 
                 // Set existing podcast URL
@@ -199,7 +199,7 @@ const BlogPage = () => {
       if (!isHindi) {
         // If Hindi version not loaded yet, translate and cache it
         if (!translatedContent) {
-          const res = await axios.post('http://localhost:5000/api/translate', {
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/translate`, {
             text: blog.content,
             targetLanguage: 'hi',
           });
@@ -231,7 +231,7 @@ const BlogPage = () => {
 
     try {
       setPodcastLoading(true);
-      const res = await axios.post(`http://localhost:5000/api/podcast/${blog._id}/podcast`);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/podcast/${blog._id}/podcast`);
       toast.success("Podcast generated successfully!");
       setPodcastUrl(res.data.podcastUrl);
     } catch (error) {

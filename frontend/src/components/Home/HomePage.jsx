@@ -27,8 +27,8 @@ useEffect(() => {
     try {
       setLoading(true);
       setError(false); // Reset error on new fetch attempt
-      const response = await axios.get('http://localhost:5000/api/blogs');
-      setBlogs(Array.isArray(response.data) ? response.data : []); // Ensure it's an array
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/blogs`);
+      setBlogs(Array.isArray(response.data) ? response.data : []); 
     } catch (err) {
       console.error('Error fetching blogs:', err);
       setBlogs([]);

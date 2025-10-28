@@ -21,7 +21,7 @@ const MyBlogs = () => {
             try {
                 const session = await getCurrentUserSession();
                 const idToken = session.getIdToken().getJwtToken();
-                const response = await axios.get('http://localhost:5000/api/blogs/myblogs', {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/blogs/myblogs`, {
                     headers: { Authorization: `Bearer ${idToken}` },
                 });
                 setBlogs(Array.isArray(response.data) ? response.data : []);
@@ -57,7 +57,7 @@ const MyBlogs = () => {
             const session = await getCurrentUserSession();
             const idToken = session.getIdToken().getJwtToken();
 
-            await axios.delete(`http://localhost:5000/api/blogs/${blogToDelete}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/blogs/${blogToDelete}`, {
                 headers: { Authorization: `Bearer ${idToken}` },
             });
 

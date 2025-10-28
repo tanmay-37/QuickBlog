@@ -198,7 +198,7 @@ const BlogForm = () => {
         setIsEnhancing(enhanceType);
         try {
             const requestData = { textToEnhance: currentContent, enhanceType: enhanceType };
-            const res = await axios.post('http://localhost:5000/api/enhance-text', requestData); // Use correct backend URL
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/enhance-text`, requestData); // Use correct backend URL
             if (res.data && res.data.enhancedText) {
                 setValue('content', res.data.enhancedText, { shouldValidate: true, shouldDirty: true });
                 showAlert("Success", "Text enhancement applied!");
