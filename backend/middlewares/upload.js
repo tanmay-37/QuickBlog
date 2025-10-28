@@ -20,7 +20,7 @@ const upload = multer({
   storage: multerS3({
     s3: s3Client, // <-- Pass the v3 client here
     bucket: process.env.S3_BUCKET_COVER,
-    acl: 'public-read', // Optional: You can often remove this and set bucket policy instead
+    //acl: 'public-read', // Optional: You can often remove this and set bucket policy instead
     key: (req, file, cb) => {
       const ext = path.extname(file.originalname);
       const uniqueName = `${Date.now()}-${file.originalname}`; // Changed for a cleaner name
